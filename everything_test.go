@@ -3,7 +3,9 @@ package pipeline
 import (
 	"log"
 	"math/rand"
+	"sync"
 	"testing"
+	"time"
 )
 
 func Generator(out chan <- interface{}) {
@@ -37,4 +39,26 @@ func Printer(in <- chan interface{}) {
 func TestWorks(t *testing.T) {
 	p := NewPipeLine(Generator, 1).WithPipe(Mult, 1).WithPipe(Plus, 1).WithSinks(Printer, 1)
 	p.Up()
+}
+
+func TestWaits(t *testing.T) {
+	cnt := 0
+	mu := &sync.Mutex{}
+	Counter := func (in <- chan interface{}) {
+		for range in {
+			mu.Lock()
+			cnt++
+			mu.Unlock()
+		}
+	}
+
+	NewPipeLine(Generator, 1).WithPipe(PipeFromFunc(func(arg interface{})interface{}{
+		time.Sleep(100 * time.Millisecond)
+		return arg
+	}), 100).WithSinks(Counter, 1).Up()
+
+
+	if cnt != 1000 {
+		t.Fatalf("cnt != 1000: %v", cnt)
+	}
 }

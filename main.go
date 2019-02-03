@@ -62,6 +62,7 @@ func mux(ins []chan interface{}, outs []chan interface{}) {
 
 		// read from some input
 		cases := make([]reflect.SelectCase, 0)
+		caseInds := make([]int, 0, 0)
 		for i := 0; i < len(ins); i++ {
 			if closed[i] {
 				continue
@@ -71,8 +72,10 @@ func mux(ins []chan interface{}, outs []chan interface{}) {
 				Dir: reflect.SelectRecv,
 				Chan: reflect.ValueOf(ins[i]),
 			})
+			caseInds = append(caseInds, i)
 		}
 		chosen, recv, _ := reflect.Select(cases)
+		chosen = caseInds[chosen]
 		if recv.IsNil() {
 			closed[chosen] = true
 			nClosed++
