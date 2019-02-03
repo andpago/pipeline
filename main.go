@@ -142,3 +142,11 @@ func (p *Pipeline) Up() {
 	wg.Wait()
 }
 
+func PipeFromFunc(f func(interface{})interface{}) Pipe {
+	return func(in <- chan interface{}, out chan <- interface{}) {
+		for i := range in {
+			out <- f(i)
+		}
+		close(out)
+	}
+}
