@@ -97,7 +97,7 @@ func mux(ins []chan interface{}, outs []chan interface{}) {
 func makeChans(len int) []chan interface{} {
 	res := make([]chan interface{}, len)
 	for i := 0; i < len; i++ {
-		res[i] = make(chan interface{})
+		res[i] = make(chan interface{}, 1)
 	}
 
 	return res
