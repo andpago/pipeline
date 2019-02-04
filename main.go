@@ -1,6 +1,7 @@
 package pipeline
 
 import (
+	"fmt"
 	"reflect"
 	"sync"
 )
@@ -152,4 +153,25 @@ func PipeFromFunc(f func(interface{})interface{}) Pipe {
 		}
 		close(out)
 	}
+}
+
+func SourceFromSlice(seq interface{}) (Source, error) {
+	val := reflect.ValueOf(seq)
+
+	if val.Kind() != reflect.Slice {
+		return nil, fmt.Errorf("not a slice")
+	}
+
+	sl := make([]interface{}, val.Len())
+	for i := 0; i < val.Len(); i++ {
+		sl[i] = val.Index(i).Interface()
+	}
+
+	return func(out chan <- interface{}) {
+		defer close(out)
+
+		for _, value := range sl {
+			out <- value
+		}
+	}, nil
 }
