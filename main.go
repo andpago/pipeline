@@ -175,3 +175,11 @@ func SourceFromSlice(seq interface{}) (Source, error) {
 		}
 	}, nil
 }
+
+func SinkFromFunc(f func (interface{})) Sink {
+	return func(in <-chan interface{}) {
+		for value := range in {
+			f(value)
+		}
+	}
+}
