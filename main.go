@@ -10,6 +10,12 @@ type Layer []interface{}
 
 type Pipeline struct {
 	line []Layer
+	debug bool
+}
+
+func (p *Pipeline) Debug() *Pipeline {
+	p.debug = true
+	return p
 }
 
 type Source func(chan <- interface{})
@@ -180,6 +186,22 @@ func SinkFromFunc(f func (interface{})) Sink {
 	return func(in <-chan interface{}) {
 		for value := range in {
 			f(value)
+		}
+	}
+}
+
+func Once() Source {
+	return func(out chan<- interface{}) {
+		out <- true
+		close(out)
+	}
+}
+
+func Times(n int) Source {
+	return func(out chan<- interface{}) {
+		defer close(out)
+		for i := 0; i < n; i++ {
+			out <- i
 		}
 	}
 }
