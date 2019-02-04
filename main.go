@@ -106,7 +106,7 @@ func makeChans(len int) []chan interface{} {
 	return res
 }
 
-func (p *Pipeline) Up() {
+func (p *Pipeline) Up() *sync.WaitGroup {
 	sourceChans := makeChans(len(p.line[0]))
 
 	for i, sch := range sourceChans {
@@ -142,7 +142,7 @@ func (p *Pipeline) Up() {
 		}(wg, fn.(Sink), insSecond[j])
 	}
 
-	wg.Wait()
+	return wg
 }
 
 func PipeFromFunc(f func(interface{})interface{}) Pipe {
