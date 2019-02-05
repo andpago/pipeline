@@ -190,11 +190,9 @@ func SinkFromFunc(f func (interface{})) Sink {
 	}
 }
 
-func Once() Source {
-	return func(out chan<- interface{}) {
-		out <- true
-		close(out)
-	}
+func Once(out chan<- interface{}) {
+	out <- true
+	close(out)
 }
 
 func Times(n int) Source {
